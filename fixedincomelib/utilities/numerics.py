@@ -108,20 +108,26 @@ class Interpolator1DPCP(Interpolator1D):
         assert self.extrap_method_ == ExtrapMethod.FLAT
 
     def interpolate(self, x: float) -> float:
-        #TODO
-        pass
+        idx = min(int(np.searchsorted(self.axis1_, x, side='left')), self.length_ - 1)
+        return float(self.values_[idx])
 
     def integrate(self, start_x: float, end_x: float) -> float:
-        #TODO
-        pass
+        widths = self.gradient_of_integrated_value_wrt_ordinate(start_x, end_x)
+        return float(np.dot(widths, self.values_))
 
     def gradient_wrt_ordinate(self, x: float) -> np.ndarray:
-        #TODO
-        pass
+        grad = np.zeros(self.length_)
+        idx = min(int(np.searchsorted(self.axis1_, x, side='left')), self.length_ - 1)
+        grad[idx] = 1.0
+        return grad
 
     def gradient_of_integrated_value_wrt_ordinate(self, start_x: float, end_x: float) -> np.ndarray:
-        #TODO
-        pass
+        lower = np.concatenate(([-np.inf], self.axis1_))
+        upper = np.concatenate((self.axis1_, [np.inf]))
+        widths = np.maximum(0.0, np.minimum(end_x, upper) - np.maximum(start_x, lower))
+        grad = widths[:-1].copy()
+        grad[-1] += widths[-1]
+        return grad
 
 
 class InterpolatorFactory:
